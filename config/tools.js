@@ -104,7 +104,8 @@ export const tools = [
         },
         completion_rate: {
           type: "number",
-          description: "Overall task completion percentage for the week (0-100)",
+          description:
+            "Overall task completion percentage for the week (0-100)",
         },
         dsa_done: {
           type: "number",
@@ -149,4 +150,64 @@ export const tools = [
       ],
     },
   },
-]
+  {
+    name: "save_weekly_goals",
+    description:
+      "Save next week's goals to Notion. Call this every Sunday AFTER save_weekly_retro has been called. Claude generates 3-5 goals across different tracks based on 90-day goals, the retro just written, and completion stats. Each goal in the array creates one row in the Weekly Goals database.",
+    input_schema: {
+      type: "object",
+      properties: {
+        goals: {
+          type: "array",
+          description:
+            "List of weekly goals to create. Each item creates one row in Notion.",
+          items: {
+            type: "object",
+            properties: {
+              goal: {
+                type: "string",
+                description:
+                  "Clear, measurable goal title. Example: 'Send 2 job applications to Supabase and Whereby'",
+              },
+              track: {
+                type: "string",
+                description: "Which 90-day track this goal belongs to",
+                enum: [
+                  "DSA",
+                  "System Design",
+                  "AI/Agents",
+                  "Health",
+                  "Job Apps",
+                ],
+              },
+              priority: {
+                type: "string",
+                description:
+                  "Priority level — set Job Apps to High if no applications were sent last week",
+                enum: ["High", "Medium", "Low"],
+              },
+              why_this_week: {
+                type: "string",
+                description:
+                  "Why this goal is important THIS specific week. Reference retro data. Example: 'Zero applications sent last week — this is the critical gap'",
+              },
+              success_criteria: {
+                type: "string",
+                description:
+                  "How you know the goal is done. Example: 'Can implement MinHeap blindly + solved 5 problems'",
+              },
+            },
+            required: [
+              "goal",
+              "track",
+              "priority",
+              "why_this_week",
+              "success_criteria",
+            ],
+          },
+        },
+      },
+      required: ["goals"],
+    },
+  },
+];

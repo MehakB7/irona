@@ -45,6 +45,19 @@ class NotionManager {
     }
   }
 
+  async getLastRetro() {
+    try {
+      const response = await this.notionClient.dataSources.query({
+        data_source_id: this.retroDsId,
+        sorts: [{ property: "Date", direction: "descending" }],
+        page_size: 1,
+      });
+      return response.results[0] ?? null;
+    } catch (e) {
+      this.#handleError("get last retro", error);
+    }
+  }
+
   async getDailyAgenda() {
     try {
       const date = new Date().toISOString().split("T")[0];
