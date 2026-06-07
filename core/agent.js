@@ -1,6 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { SYSTEM_PROMPT } from "../config/constant";
-class Irona {
+import { toolRegistry } from "./toolRegistry";
+import { tools } from "../config/tools";
+export class Irona {
   messages = [];
   tools = [];
   maxTurns = 10;
@@ -8,6 +10,7 @@ class Irona {
     this.client = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
+    this.tools = tools;
   }
 
   async listen(message) {
@@ -15,7 +18,7 @@ class Irona {
     let turn = this.maxTurns;
     this.messages = [{ role: "user", content: message }];
     let response = await this.client.messages.create({
-      model: "claude-3-haiku-20240307",
+      model: "claude-haiku-4-5-20251001",
       tools: this.tools,
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
@@ -28,7 +31,7 @@ class Irona {
         (block) => block.type === "tool_use",
       );
 
-      const ans = await Promise.all(
+      const toolResults = await Promise.all(
         toolUseBlocks.map(async (tool) => {
           const result = await toolRegistry.execute(tool.name, tool.input);
           return {
@@ -45,7 +48,7 @@ class Irona {
       );
 
       response = await  this.client.messages.create({
-        model: "claude-3-haiku-20240307",
+        model: "claude-haiku-4-5-20251001",
         system: SYSTEM_PROMPT,
         max_tokens: 1024,
         tools: this.tools,
