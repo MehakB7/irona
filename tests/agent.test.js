@@ -13,4 +13,9 @@ describe('Irona Agent Loop', () => {
         const response = await irona.listen("what is the weather today")
         expect(response).toBeTruthy()
     }, 30000)
+    test('handle generation of the weekly task ', async()=>{
+        const resposne = await irona.listen("generate the weekly task for this week")
+        expect(resposne).toBeTruthy();
+        expect(typeof resposne).toBe('string')
+    }, 30000)
 })
