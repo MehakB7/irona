@@ -1,5 +1,5 @@
 import { Client } from "@notionhq/client";
-import { getCurrentWeekLabel } from "../utils/week";
+import { getCurrentWeekLabel } from "../utils/week.js";
 
 class NotionManager {
   constructor() {

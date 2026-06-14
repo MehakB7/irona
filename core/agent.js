@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { SYSTEM_PROMPT } from "../config/constant";
-import { toolRegistry } from "./toolRegistry";
-import { tools } from "../config/tools";
+import { SYSTEM_PROMPT } from "../config/constant.js";
+import { toolRegistry } from "./toolRegistry.js";
+import { tools } from "../config/tools.js";
 export class Irona {
   messages = [];
   tools = [];
