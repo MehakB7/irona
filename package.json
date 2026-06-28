@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test-irona": "npx vitest run tests/agent.test.js",
     "test:watch": "vitest",
-    "start-irona": "node index.js"
+    "start-irona": "node index.js",
+    "prepare": "husky"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.85.0",
@@ -19,6 +20,7 @@
     "node-telegram-bot-api": "^0.67.0"
   },
   "devDependencies": {
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.7",
+    "husky": "^9.1.7"
   }
 }
