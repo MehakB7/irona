@@ -13,3 +13,9 @@ export function getDaysRemaining() {
     const today = new Date()
     return Math.ceil((end - today) / (1000 * 60 * 60 * 24))
 }
+
+export function getPlanEndDate() {
+    const end = new Date(process.env.PLAN_START_DATE)
+    end.setDate(end.getDate() + 92)
+    return end.toISOString().split("T")[0]
+}
