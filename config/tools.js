@@ -78,7 +78,7 @@ export const tools = [
   {
     name: "save_weekly_goals",
     description:
-      "Save next week's goals to Notion. Call this every Sunday AFTER save_weekly_retro has been called. Claude generates 3-5 goals across different tracks based on 90-day goals, the retro just written, and completion stats. Each goal in the array creates one row in the Weekly Goals database.",
+      "Save next week's goals to Notion. Call this every Sunday. Claude generates 3-5 goals across different tracks based on 90-day goals, and completion stats. Each goal in the array creates one row in the Weekly Goals database.",
     input_schema: {
       type: "object",
       properties: {
