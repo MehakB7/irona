@@ -17,10 +17,11 @@
     "@anthropic-ai/sdk": "^0.85.0",
     "@notionhq/client": "^5.16.0",
     "dotenv": "^17.4.0",
-    "node-telegram-bot-api": "^0.67.0"
+    "node-telegram-bot-api": "^0.67.0",
+    "redis": "^6.1.0"
   },
   "devDependencies": {
-    "vitest": "^4.1.7",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "vitest": "^4.1.7"
   }
 }
