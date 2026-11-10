@@ -85,6 +85,15 @@ The accountability system is three linked Notion databases:
 Daily agenda generation always reads this week's goals **and** yesterday's unfinished
 tasks first, so nothing silently falls through.
 
+### Short-term memory (in progress)
+
+Every turn is written to Redis by `memory/STM.js`, keyed as `${chatId}:${YYYY-MM-DD}` and
+trimmed to the last 40 entries. **Nothing reads it back yet** — `getHistory` is an
+unimplemented stub, so each `listen()` call still starts `this.messages` from scratch with
+just the incoming message. Redis connection failures are logged, not thrown
+(`isRedisConnected()` in `memory/redisClient.js`), so the bot keeps working if Redis is down.
+Run `docker compose up -d` to start a local Redis instance for this.
+
 ---
 
 ## 🗂️ Project Structure
@@ -101,11 +110,15 @@ irona/
 ├── config/
 │   ├── tools.js          # Claude tool definitions (JSON schema)
 │   └── constant.js       # System prompt
+├── memory/
+│   ├── redisClient.js    # Redis connection (REDIS_URL), fails soft if unreachable
+│   └── STM.js            # Per-chat turn storage — not yet read back into prompts
 ├── utils/
 │   └── week.js           # Week label + days-remaining helpers
 ├── tests/
 │   ├── agent.test.js     # Agent-loop integration tests
 │   └── notion.test.js    # Notion integration tests
+├── docker-compose.yml    # Local Redis (redis-dev, port 6379) for STM
 └── index.js              # Entry point — starts the Telegram transport
 ```
 
@@ -118,6 +131,7 @@ irona/
 | LLM | Claude `claude-haiku-4-5` via the Anthropic SDK |
 | Notes/Goals | Notion API (`@notionhq/client`) |
 | Messaging | Telegram (`node-telegram-bot-api`, polling) |
+| Short-term memory | Redis (`redis` client), local via Docker Compose |
 | Runtime | Node.js 18+ (ES Modules) |
 | Tests | Vitest |
 | Config | dotenv |
@@ -132,6 +146,7 @@ irona/
 - Anthropic API key
 - Notion integration token + three databases (90-day goals, weekly goals, daily agenda)
 - Telegram bot token (via [@BotFather](https://t.me/botfather)) and your chat ID
+- Docker (for local Redis, used by the in-progress short-term memory layer)
 
 ### Setup
 
@@ -155,11 +170,13 @@ NOTION_WEEKLY_GOALS_DS_ID=     # Weekly Goals data source ID
 TELEGRAM_BOT_TOKEN=            # Telegram bot token
 TELEGRAM_CHAT_ID=              # Your Telegram chat ID (only this chat is allowed)
 PLAN_START_DATE=               # Plan start date, e.g. 2026-07-01 (drives week labels)
+REDIS_URL=                     # Redis connection URL (local dev: docker compose up -d)
 ```
 
 ### Run
 
 ```bash
+docker compose up -d    # start local Redis (redis-dev, port 6379)
 npm run start-irona     # starts the Telegram bot
 # or
 node index.js
@@ -170,11 +187,18 @@ Then message your bot on Telegram.
 ### Test
 
 ```bash
-npm test                # runs the Vitest suite
+npm test                        # runs the full Vitest suite
+npm run test-irona               # only tests/agent.test.js
+npx vitest run tests/notion.test.js   # only the Notion integration tests
+npm run test:watch               # vitest in watch mode
 ```
 
 > Note: the tests are **integration** tests — they hit live Notion and Anthropic, so
-> they require a valid `.env` and will create/modify real Notion rows.
+> they require a valid `.env` and will create/modify real Notion rows. There are no mocks.
+
+A Husky `pre-commit` hook runs `npm test`; `pre-push` fails if `.env` and `.env.example`
+don't have the same number of variables, so keep `.env.example` updated (values blank)
+whenever you add an env var.
 
 ---
 
@@ -196,8 +220,9 @@ npm test                # runs the Vitest suite
 
 Honest about what's *not* built yet:
 
-- [ ] **Cross-turn memory** — conversations currently start fresh each message; add a
-      per-chat sliding-window history.
+- [ ] **Cross-turn memory** — turns are now persisted to Redis per-chat
+      (`memory/STM.js`), but nothing reads them back in yet (`getHistory` is a stub);
+      conversations still start fresh each message.
 - [ ] **Graceful tool-error recovery** — return tool failures as `tool_result` errors so
       the agent can respond instead of aborting the turn.
 - [ ] **Proactive scheduling** — `node-cron` morning agenda push, evening check-in, and a

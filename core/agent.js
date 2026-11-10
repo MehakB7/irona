@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { SYSTEM_PROMPT } from "../config/constant.js";
 import { toolRegistry } from "./toolRegistry.js";
 import { tools } from "../config/tools.js";
+import { ShortTermMemory } from "../memory/STM.js";
 export class Irona {
   messages = [];
   tools = [];
@@ -13,7 +14,7 @@ export class Irona {
     this.tools = tools;
   }
 
-  async listen(message) {
+  async listen(message, chatId) {
 
     let turn = this.maxTurns;
     this.messages = [{ role: "user", content: message }];
@@ -59,6 +60,8 @@ export class Irona {
     const finalText = response.content.find(
       (block) => block.type === "text",
     )?.text;
+
+    await  ShortTermMemory.saveTurnData(chatId, message, finalText);
 
     return finalText;
   }

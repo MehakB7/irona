@@ -21,7 +21,7 @@ export const startIrona = async () => {
     bot.sendChatAction(chatId, "typing");
 
     try {
-      const response = await irona.listen(userMessage);
+      const response = await irona.listen(userMessage, chatId);
 
       bot.sendMessage(chatId, response, { parse_mode: "Markdown" });
     } catch (e) {
